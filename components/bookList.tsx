@@ -1,6 +1,7 @@
 import { books } from "@/type/book";
+import { theme } from "@/constants/theme";
 import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 
 type Props = {
   book: books;
@@ -8,24 +9,48 @@ type Props = {
 
 const BookList = ({ book }: Props) => {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        gap: 4,
-        borderStyle: "solid",
-        borderWidth: 2,
-        borderColor: "black",
-      }}
-    >
-      <Image
-        style={{ width: 150, height: 200 }}
-        source={{ uri: book.cover }}
-      ></Image>
-      <Text>{book.name}</Text>
+    <View style={styles.container}>
+      <View style={styles.imageContainer}>
+        <Image
+          style={styles.image}
+          source={{ uri: book.cover }}
+          contentFit="cover"
+        />
+      </View>
+      <View style={styles.content}>
+        <Text style={styles.title} numberOfLines={2}>
+          {book.name}
+        </Text>
+      </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: 160,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.lg,
+    overflow: "hidden",
+    ...theme.shadows.md,
+  },
+  imageContainer: {
+    width: "100%",
+    height: 220,
+    backgroundColor: theme.colors.border,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  content: {
+    padding: theme.spacing.sm,
+  },
+  title: {
+    ...theme.typography.bodySmall,
+    color: theme.colors.text,
+    fontWeight: "600",
+  },
+});
 
 export default BookList;

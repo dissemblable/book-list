@@ -19,7 +19,7 @@ export class BookService {
     return result;
   };
 
-  static createBook = async (book: books) => {
+  static createBook = async (book: book) => {
     const response = await fetch(`http://10.14.169.76:3000/books`, {
       method: "POST",
       headers: {
@@ -45,7 +45,7 @@ export class BookService {
     return result;
   };
 
-  static deleteBook = async (id: number) => {
+  static deleteBook = async (id: string) => {
     await fetch(`http://10.14.169.76:3000/books/${id}`, {
       method: "DELETE",
     });
