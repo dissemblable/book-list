@@ -1,10 +1,10 @@
 export type books = {
   id: number;
   name: string;
+  cover: string;
 };
 
 export type book = {
-  id: number;
   name: string;
   author: string;
   editor: string;

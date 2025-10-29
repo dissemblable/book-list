@@ -1,8 +1,8 @@
-import { books } from "@/type/book";
+import { book, books } from "@/type/book";
 
 export class BookService {
   static getBooks = async () => {
-    const response = await fetch("http://localhost:3000/books").then((res) =>
+    const response = await fetch("http://10.14.169.76:3000/books").then((res) =>
       res.json()
     );
 
@@ -10,17 +10,17 @@ export class BookService {
     return result;
   };
 
-  static getBook = async (id: number) => {
-    const response = await fetch(`http://localhost:3000/books/${id}`).then(
+  static getBook = async (id: string) => {
+    const response = await fetch(`http://10.14.169.76:3000/books/${id}`).then(
       (res) => res.json()
     );
 
-    const result: books = response;
+    const result: book = response;
     return result;
   };
 
   static createBook = async (book: books) => {
-    const response = await fetch(`http://localhost:3000/books`, {
+    const response = await fetch(`http://10.14.169.76:3000/books`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,7 +33,7 @@ export class BookService {
   };
 
   static updateBook = async (id: number, book: books) => {
-    const response = await fetch(`http://localhost:3000/books/${id}`, {
+    const response = await fetch(`http://10.14.169.76:3000/books/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export class BookService {
   };
 
   static deleteBook = async (id: number) => {
-    await fetch(`http://localhost:3000/books/${id}`, {
+    await fetch(`http://10.14.169.76:3000/books/${id}`, {
       method: "DELETE",
     });
     return "Book deleted";

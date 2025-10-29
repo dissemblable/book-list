@@ -1,4 +1,5 @@
 import { books } from "@/type/book";
+import { Image } from "expo-image";
 import { Text, View } from "react-native";
 
 type Props = {
@@ -16,9 +17,12 @@ const BookList = ({ book }: Props) => {
         borderStyle: "solid",
         borderWidth: 2,
         borderColor: "black",
-        margin: 5,
       }}
     >
+      <Image
+        style={{ width: 150, height: 200 }}
+        source={{ uri: book.cover }}
+      ></Image>
       <Text>{book.name}</Text>
     </View>
   );

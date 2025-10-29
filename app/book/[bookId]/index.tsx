@@ -1,13 +1,27 @@
+import BookDetail from "@/components/bookDetail";
+import { BookService } from "@/services/books";
+import { book } from "@/type/book";
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
 
-const BookDetail = () => {
+const { getBook } = BookService;
+
+const BookDetailPage = () => {
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
+  const [bookInformation, setBookInformation] = useState<book>();
+
+  useEffect(() => {
+    getBook(bookId).then((value) => {
+      setBookInformation(value);
+    });
+  }, []);
+
   return (
     <View>
-      <Text> ici c est la page de détaille {bookId}</Text>
+      {bookInformation && <BookDetail book={bookInformation}></BookDetail>}
     </View>
   );
 };
 
-export default BookDetail;
+export default BookDetailPage;
