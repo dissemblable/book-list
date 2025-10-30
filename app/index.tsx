@@ -6,10 +6,10 @@ import { Link, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ScrollView,
-  View,
   StyleSheet,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Searchbar } from "react-native-paper";
 

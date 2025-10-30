@@ -1,7 +1,7 @@
-import { books } from "@/type/book";
 import { theme } from "@/constants/theme";
+import { books } from "@/type/book";
 import { Image } from "expo-image";
-import { Text, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 type Props = {
   book: books;
@@ -28,7 +28,7 @@ const BookList = ({ book }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: 160,
+    width: 150,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.lg,
     overflow: "hidden",
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    height: 220,
+    height: 190,
     backgroundColor: theme.colors.border,
   },
   image: {
