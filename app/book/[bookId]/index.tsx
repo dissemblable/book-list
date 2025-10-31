@@ -2,15 +2,16 @@ import BookDetail from "@/components/bookDetail";
 import { theme } from "@/constants/theme";
 import { BookService } from "@/services/books";
 import { book } from "@/type/book";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Alert,
   ActivityIndicator,
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { getBook, deleteBook } = BookService;
@@ -21,32 +22,45 @@ const BookDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const handleDelete = async () => {
-    Alert.alert(
-      "Supprimer le livre",
-      "Êtes-vous sûr de vouloir supprimer ce livre ?",
-      [
-        {
-          text: "Annuler",
-          style: "cancel",
-        },
-        {
-          text: "Supprimer",
-          style: "destructive",
-          onPress: async () => {
-            await deleteBook(bookId);
-            router.back();
+    if (Platform.OS === "web") {
+      const confirmed = globalThis.confirm(
+        "Êtes-vous sûr de vouloir supprimer ce livre ?"
+      );
+
+      if (confirmed) {
+        await deleteBook(bookId);
+        router.back();
+      }
+    } else {
+      Alert.alert(
+        "Supprimer le livre",
+        "Êtes-vous sûr de vouloir supprimer ce livre ?",
+        [
+          {
+            text: "Annuler",
+            style: "cancel",
           },
-        },
-      ]
-    );
+          {
+            text: "Supprimer",
+            style: "destructive",
+            onPress: async () => {
+              await deleteBook(bookId);
+              router.back();
+            },
+          },
+        ]
+      );
+    }
   };
 
-  useEffect(() => {
-    getBook(bookId).then((value) => {
-      setBookInformation(value);
-      setIsLoading(false);
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getBook(bookId).then((value) => {
+        setBookInformation(value);
+        setIsLoading(false);
+      });
+    }, [])
+  );
 
   if (isLoading) {
     return (
@@ -62,7 +76,12 @@ const BookDetailPage = () => {
       <View style={styles.actionBar}>
         <TouchableOpacity
           style={[styles.button, styles.editButton]}
-          onPress={() => router.push("/modals/updateBookModal")}
+          onPress={() =>
+            router.navigate({
+              pathname: "/modals/updateBookModal",
+              params: { id: bookId },
+            })
+          }
         >
           <Text style={styles.buttonText}>Modifier</Text>
         </TouchableOpacity>

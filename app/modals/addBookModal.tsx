@@ -5,7 +5,7 @@ import { View } from "react-native";
 const addbookModal = () => {
   return (
     <View>
-      <BookForm initialValue={generalInformation}></BookForm>
+      <BookForm type="create" initialValue={generalInformation}></BookForm>
     </View>
   );
 };

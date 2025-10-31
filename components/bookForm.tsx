@@ -5,18 +5,29 @@ import { Formik } from "formik";
 import { Button, TextInput, View } from "react-native";
 import { Checkbox } from "react-native-paper";
 
-const { createBook } = BookService;
+const { createBook, updateBook } = BookService;
 
 type Props = {
   initialValue: book;
+  type: "create" | "update";
+  bookId?: string;
 };
 
-const BookForm = ({ initialValue }: Props) => {
+const BookForm = ({ initialValue, type, bookId }: Props) => {
   return (
     <Formik
       initialValues={initialValue}
       onSubmit={async (values) => {
-        await createBook(values), router.back();
+        if (type === "create") {
+          await createBook(values);
+          router.back();
+        } else {
+          if (bookId === undefined) {
+            return;
+          }
+          await updateBook(bookId, values);
+          router.back();
+        }
       }}
     >
       {({ handleChange, handleBlur, handleSubmit, values, setFieldValue }) => (

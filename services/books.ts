@@ -32,7 +32,7 @@ export class BookService {
     return result;
   };
 
-  static updateBook = async (id: number, book: books) => {
+  static updateBook = async (id: string, book: book) => {
     const response = await fetch(`http://localhost:3000/books/${id}`, {
       method: "PUT",
       headers: {
