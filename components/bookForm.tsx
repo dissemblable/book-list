@@ -1,5 +1,6 @@
 import { BookService } from "@/services/books";
 import { book } from "@/type/book";
+import { faker } from "@faker-js/faker";
 import { router } from "expo-router";
 import { Formik } from "formik";
 import { Button, TextInput, View } from "react-native";
@@ -14,12 +15,20 @@ type Props = {
 };
 
 const BookForm = ({ initialValue, type, bookId }: Props) => {
+  const coverWidth = 400;
+  const coverHight = 600;
+  const getCoverImage = () =>
+    faker.image.url({
+      width: coverWidth,
+      height: coverHight,
+    });
+
   return (
     <Formik
       initialValues={initialValue}
       onSubmit={async (values) => {
         if (type === "create") {
-          await createBook(values);
+          await createBook({ ...values, cover: getCoverImage() });
           router.back();
         } else {
           if (bookId === undefined) {
