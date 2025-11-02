@@ -6,7 +6,7 @@ export class BookService {
       res.json()
     );
 
-    const result: books[] = response;
+    const result: (books & Partial<book>)[] = response;
     return result;
   };
 

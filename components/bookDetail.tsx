@@ -26,6 +26,7 @@ const { getNotes, createNote } = NotesService;
 
 const BookDetail = ({ book, bookId }: Props) => {
   const [isFavorite, setIsFavorite] = useState(book.favorite);
+  const [rating, setRating] = useState(book.rating);
   const [isLoading, setIsLoading] = useState(false);
   const [notesList, setNotesList] = useState<notes[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
@@ -58,6 +59,20 @@ const BookDetail = ({ book, bookId }: Props) => {
       setIsFavorite(newFavoriteState);
     } catch (error) {
       console.error("Error updating favorite:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRatingChange = async (newRating: number) => {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      await updateBook(bookId, { ...book, rating: newRating });
+      setRating(newRating);
+    } catch (error) {
+      console.error("Error updating rating:", error);
     } finally {
       setIsLoading(false);
     }
@@ -113,8 +128,16 @@ const BookDetail = ({ book, bookId }: Props) => {
           <InfoRow label="Éditeur" value={book.editor} />
           <InfoRow label="Année" value={book.year?.toString()} />
           <InfoRow label="Thème" value={book.theme} />
-          <InfoRow label="Note" value={`${book.rating}/5`} />
           <InfoRow label="Lu" value={book.read ? "Oui" : "Non"} />
+
+          <View style={styles.ratingRow}>
+            <Text style={styles.infoLabel}>Note</Text>
+            <StarRating
+              rating={rating}
+              onRatingChange={handleRatingChange}
+              disabled={isLoading}
+            />
+          </View>
         </View>
 
         <View style={styles.notesSection}>
@@ -173,6 +196,35 @@ const BookDetail = ({ book, bookId }: Props) => {
         </View>
       </View>
     </ScrollView>
+  );
+};
+
+const StarRating = ({
+  rating,
+  onRatingChange,
+  disabled = false,
+}: {
+  rating: number;
+  onRatingChange: (rating: number) => void;
+  disabled?: boolean;
+}) => {
+  return (
+    <View style={styles.starsContainer}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <TouchableOpacity
+          key={star}
+          onPress={() => !disabled && onRatingChange(star)}
+          disabled={disabled}
+          style={styles.starButton}
+        >
+          <Ionicons
+            name={star <= rating ? "star" : "star-outline"}
+            size={28}
+            color={star <= rating ? "#FFD700" : "#ccc"}
+          />
+        </TouchableOpacity>
+      ))}
+    </View>
   );
 };
 
@@ -313,6 +365,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontStyle: "italic",
     paddingVertical: theme.spacing.xl,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: theme.spacing.xs,
+    paddingTop: theme.spacing.md,
+  },
+  starsContainer: {
+    flexDirection: "row",
+    gap: theme.spacing.xs,
+  },
+  starButton: {
+    padding: 2,
   },
 });
 
