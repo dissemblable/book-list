@@ -1,13 +1,17 @@
 import { theme } from "@/constants/theme";
 import { BookService } from "@/services/books";
+import { NotesService } from "@/services/notes";
 import { book } from "@/type/book";
+import { notes } from "@/type/notes";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -18,10 +22,31 @@ type Props = {
 };
 
 const { updateBook } = BookService;
+const { getNotes, createNote } = NotesService;
 
 const BookDetail = ({ book, bookId }: Props) => {
   const [isFavorite, setIsFavorite] = useState(book.favorite);
   const [isLoading, setIsLoading] = useState(false);
+  const [notesList, setNotesList] = useState<notes[]>([]);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [isAddingNote, setIsAddingNote] = useState(false);
+
+  useEffect(() => {
+    fetchNotes();
+  }, [bookId]);
+
+  const fetchNotes = async () => {
+    try {
+      setLoadingNotes(true);
+      const notes = await getNotes(bookId);
+      setNotesList(notes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
 
   const toggleFavorite = async () => {
     if (isLoading) return;
@@ -35,6 +60,27 @@ const BookDetail = ({ book, bookId }: Props) => {
       console.error("Error updating favorite:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddNote = async () => {
+    if (!newNoteContent.trim() || isAddingNote) return;
+
+    try {
+      setIsAddingNote(true);
+      const newNote: notes = {
+        id: Date.now(),
+        bookId: parseInt(bookId),
+        content: newNoteContent.trim(),
+        dateISO: new Date(),
+      };
+      await createNote(bookId, newNote);
+      setNewNoteContent("");
+      await fetchNotes();
+    } catch (error) {
+      console.error("Error adding note:", error);
+    } finally {
+      setIsAddingNote(false);
     }
   };
 
@@ -69,6 +115,61 @@ const BookDetail = ({ book, bookId }: Props) => {
           <InfoRow label="Thème" value={book.theme} />
           <InfoRow label="Note" value={`${book.rating}/5`} />
           <InfoRow label="Lu" value={book.read ? "Oui" : "Non"} />
+        </View>
+
+        <View style={styles.notesSection}>
+          <Text style={styles.sectionTitle}>Notes</Text>
+
+          <View style={styles.addNoteContainer}>
+            <TextInput
+              style={styles.noteInput}
+              placeholder="Ajouter une note..."
+              placeholderTextColor={theme.colors.textSecondary}
+              value={newNoteContent}
+              onChangeText={setNewNoteContent}
+              multiline
+            />
+            <TouchableOpacity
+              style={[
+                styles.addNoteButton,
+                (!newNoteContent.trim() || isAddingNote) &&
+                  styles.addNoteButtonDisabled,
+              ]}
+              onPress={handleAddNote}
+              disabled={!newNoteContent.trim() || isAddingNote}
+            >
+              {isAddingNote ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Ionicons name="add" size={24} color="#ffffff" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {loadingNotes ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
+          ) : notesList.length > 0 ? (
+            <View style={styles.notesList}>
+              {notesList.map((note) => (
+                <View key={note.id} style={styles.noteItem}>
+                  <Text style={styles.noteContent}>{note.content}</Text>
+                  <Text style={styles.noteDate}>
+                    {new Date(note.dateISO).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noNotesText}>Aucune note pour ce livre</Text>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -144,6 +245,74 @@ const styles = StyleSheet.create({
   infoValue: {
     ...theme.typography.body,
     color: theme.colors.text,
+  },
+  notesSection: {
+    marginTop: theme.spacing.xl,
+  },
+  sectionTitle: {
+    ...theme.typography.h2,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.md,
+  },
+  addNoteContainer: {
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.lg,
+  },
+  noteInput: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    ...theme.typography.body,
+    color: theme.colors.text,
+    minHeight: 80,
+    textAlignVertical: "top",
+    ...theme.shadows.sm,
+  },
+  addNoteButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    ...theme.shadows.md,
+  },
+  addNoteButtonDisabled: {
+    backgroundColor: theme.colors.textSecondary,
+    opacity: 0.5,
+  },
+  loadingContainer: {
+    padding: theme.spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notesList: {
+    gap: theme.spacing.md,
+  },
+  noteItem: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    ...theme.shadows.sm,
+  },
+  noteContent: {
+    ...theme.typography.body,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  noteDate: {
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
+    fontStyle: "italic",
+  },
+  noNotesText: {
+    ...theme.typography.body,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    fontStyle: "italic",
+    paddingVertical: theme.spacing.xl,
   },
 });
 
