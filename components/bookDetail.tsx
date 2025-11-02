@@ -1,13 +1,43 @@
-import { book } from "@/type/book";
 import { theme } from "@/constants/theme";
+import { BookService } from "@/services/books";
+import { book } from "@/type/book";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Text, View, StyleSheet, ScrollView } from "react-native";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type Props = {
   book: book;
+  bookId: string;
 };
 
-const BookDetail = ({ book }: Props) => {
+const { updateBook } = BookService;
+
+const BookDetail = ({ book, bookId }: Props) => {
+  const [isFavorite, setIsFavorite] = useState(book.favorite);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const toggleFavorite = async () => {
+    if (isLoading) return;
+
+    try {
+      setIsLoading(true);
+      const newFavoriteState = !isFavorite;
+      await updateBook(bookId, { ...book, favorite: newFavoriteState });
+      setIsFavorite(newFavoriteState);
+    } catch (error) {
+      console.error("Error updating favorite:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.imageContainer}>
@@ -16,6 +46,17 @@ const BookDetail = ({ book }: Props) => {
           source={{ uri: book.cover }}
           contentFit="cover"
         />
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={toggleFavorite}
+          disabled={isLoading}
+        >
+          <Ionicons
+            name={isFavorite ? "heart" : "heart-outline"}
+            size={32}
+            color={isFavorite ? "#e74c3c" : "#ffffff"}
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -54,10 +95,23 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 400,
     backgroundColor: theme.colors.border,
+    position: "relative",
   },
   image: {
     width: "100%",
     height: "100%",
+  },
+  favoriteButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    ...theme.shadows.md,
   },
   content: {
     padding: theme.spacing.lg,

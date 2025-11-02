@@ -72,7 +72,7 @@ const BookDetailPage = () => {
 
   return (
     <View style={styles.container}>
-      {bookInformation && <BookDetail book={bookInformation} />}
+      {bookInformation && <BookDetail book={bookInformation} bookId={bookId} />}
       <View style={styles.actionBar}>
         <TouchableOpacity
           style={[styles.button, styles.editButton]}
